@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	18-Aug-21						//
+//  Edit:	19-Aug-21						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -28,7 +28,7 @@
 #include "filemanager_dbus.h"
 #include "filemanagerredirectoradaptor.h"
 
-#include <QDBusInterface>
+#include <qtimer.h>
 
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
@@ -37,19 +37,24 @@
 K_PLUGIN_FACTORY_WITH_JSON(FileManagerRedirectorFactory, "filemanagerredirector.json", registerPlugin<FileManagerRedirectorModule>();)
 
 
+static const int DBUS_RETRY_DELAY = 60;			// connection retry wait in seconds
+static const int DBUS_RETRY_COUNT = 5;			// how many times to retry connection
+
+
 FileManagerRedirectorModule::FileManagerRedirectorModule(QObject *parent, const QVariantList &args)
   : KDEDModule(parent)
 {
+    m_retryCount = 0;
     reconfigure();
     m_fileManagerDBus = new FileManagerRedirectorDBus(this);
-    m_fileManagerDBus->connectToBus("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1");
-    qDebug() << "registered KDED module";
+    slotConnectToBus();
+    qDebug() << "KDED module activated";
 }
 
 
 FileManagerRedirectorModule::~FileManagerRedirectorModule()
 {
-    qDebug();
+    m_fileManagerDBus->disconnectFromBus();
 }
 
 
@@ -57,6 +62,31 @@ FileManagerRedirectorModule::~FileManagerRedirectorModule()
 // but has to be kept for DBus compatibility.
 void FileManagerRedirectorModule::reconfigure()
 {
+}
+
+
+void FileManagerRedirectorModule::slotConnectToBus()
+{
+    bool status = m_fileManagerDBus->connectToBus("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1");
+    if (status)						// connection succeeded
+    {
+        qDebug() << "DBus service registered";
+        return;
+    }
+
+    ++m_retryCount;					// count up failed connection
+    if (m_retryCount>DBUS_RETRY_COUNT)			// check if too many times
+    {
+        // If the failure persists, then the module can be unloaded and
+        // the connection retried using the module's "pause" and "start"
+        // buttons in System Settings -> Workspace -> Startup and Shutdown ->
+        // Background Services.
+        qWarning() << "Unable to register DBus service, giving up";
+        return;
+    }
+
+    qDebug() << "Unable to register DBus service, trying again in" << DBUS_RETRY_DELAY << "seconds";
+    QTimer::singleShot(DBUS_RETRY_DELAY*1000, this, &FileManagerRedirectorModule::slotConnectToBus);
 }
 
 

@@ -1,7 +1,7 @@
 ##########################################################################
 ##									##
 ##  Project:	File Manager Redirector					##
-##  Edit:	18-Aug-21						##
+##  Edit:	19-Aug-21						##
 ##									##
 ##########################################################################
 ##									##
@@ -68,4 +68,5 @@ target_link_libraries(filemanagerredirector
     KF5::KIOCore
     KF5::KIOWidgets)
 
+# The shared library is installed by kcoreaddons_add_plugin().
 install(FILES org.kde.filemanagerredirector.xml DESTINATION ${KDE_INSTALL_DBUSINTERFACEDIR})

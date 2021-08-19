@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	18-Aug-21						//
+//  Edit:	19-Aug-21						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -40,6 +40,7 @@ public:
     virtual ~FileManagerRedirectorDBus() override = default;
 
     bool connectToBus(const QString &service, const QString &path);
+    void disconnectFromBus();
 
     /**
      * DBus method for reconfiguring the KDED module
@@ -58,6 +59,9 @@ Q_SIGNALS:
      * This signal is emitted on a reconfigure() request.
      */
     void reconfigured();
+
+private:
+    QString m_service;
 };
 
 #endif // FILEMANAGERDBUS_H

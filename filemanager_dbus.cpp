@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	18-Aug-21						//
+//  Edit:	19-Aug-21						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -44,10 +44,45 @@ FileManagerRedirectorDBus::FileManagerRedirectorDBus(QObject *pnt)
 
 bool FileManagerRedirectorDBus::connectToBus(const QString &service, const QString &path)
 {
-    // TODO: if something is already registered at that service, then
-    // tell it to quit and wait for it to do so.
-
     qDebug() << "registering service" << service << "path" << path;
+
+    // Although the name org.freedesktop.FileManager1 also claimed by Dolphin, it
+    // is declared as a DBus activated service by the service file
+    // $KDEDIR/share/dbus-1/services/org.kde.dolphin.FileManager1.service to
+    // be activated on demand.  If there has been no demand for the service yet
+    // then the registration should succeed and the service file ignored from
+    // then on.  If the name is already claimed by a running process then just
+    // report that and give up on trying to register.
+
+    QDBusConnection conn = QDBusConnection::sessionBus();
+    // see https://unix.stackexchange.com/questions/379810/find-out-the-owner-of-a-dbus-service-name
+    // and https://dbus.freedesktop.org/doc/dbus-specification.html#message-bus-messages
+    QDBusMessage msg = QDBusMessage::createMethodCall("org.freedesktop.DBus", "/",
+                                                      "org.freedesktop.DBus",
+                                                      "GetConnectionCredentials");
+    QList<QVariant> args;
+    args.append(service);
+    msg.setArguments(args);
+
+    QDBusMessage reply = conn.call(msg, QDBus::BlockWithGui, 1000);
+							// a short timeout is enough
+    if (reply.type()==QDBusMessage::ReplyMessage)	// will get reply if already claimed
+    {
+        qWarning() << "Service" << service << "is already registered on DBus";
+        for (const QVariant &var : reply.arguments())
+        {
+            QDBusArgument arg = var.value<QDBusArgument>();
+            if (arg.currentType()==QDBusArgument::MapType)
+            {
+                QVariantMap map = qdbus_cast<QVariantMap>(arg);
+                uint peerPID = map["ProcessID"].toUInt();
+                uint peerUID = map["UnixUserID"].toUInt();
+                if (peerPID!=0) qWarning() << "Service registered by PID" << peerPID << "user" << peerUID;
+            }
+        }
+
+        return (false);					// will not be able to connect
+    }
 
     if (!QDBusConnection::sessionBus().registerService(service))
     {
@@ -62,7 +97,18 @@ bool FileManagerRedirectorDBus::connectToBus(const QString &service, const QStri
         return (false);
     }
 
+    m_service = service;				// remember name for unregistering
     return (true);
+}
+
+
+void FileManagerRedirectorDBus::disconnectFromBus()
+{
+    qDebug() << "unregistering service" << m_service;
+    if (!QDBusConnection::sessionBus().unregisterService(m_service))
+    {
+        qWarning() << "unregistering service failed";
+    }
 }
 
 
@@ -75,7 +121,7 @@ void FileManagerRedirectorDBus::reconfigure()
 static void startFileManager(const QStringList &args, const QString &startUpId)
 {
     KService::Ptr offer = KApplicationTrader::preferredService("inode/directory");
-    if (!offer)						// very unlikley
+    if (!offer)						// very unlikely
     {
         qWarning() << "No file manager service available";
         return;

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	18-Aug-21						//
+//  Edit:	19-Aug-21						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -47,8 +47,14 @@ private Q_SLOTS:
      */
     void reconfigure();
 
+    /**
+     * Try to connect to DBus
+     */
+    void slotConnectToBus();
+
 private:
-     FileManagerRedirectorDBus *m_fileManagerDBus;
+    FileManagerRedirectorDBus *m_fileManagerDBus;
+    int m_retryCount;
 };
 
 #endif // FILEMANAGER_H
