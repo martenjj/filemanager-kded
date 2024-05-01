@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	19-Aug-21						//
+//  Edit:	30-Apr-24						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -31,7 +31,7 @@
 #include <qtimer.h>
 
 #include <kpluginfactory.h>
-#include <kpluginloader.h>
+#include <kpluginmetadata.h>
 
 
 K_PLUGIN_FACTORY_WITH_JSON(FileManagerRedirectorFactory, "filemanagerredirector.json", registerPlugin<FileManagerRedirectorModule>();)

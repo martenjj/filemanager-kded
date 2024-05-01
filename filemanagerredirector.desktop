@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Service
-Name=File Manager Redirector
-Comment=Redirects file manager requests to the configured application
-X-KDE-ServiceTypes=KDEDModule
-X-KDE-Library=filemanager
-X-KDE-Kded-autoload=true
-X-KDE-Kded-load-on-demand=false
-X-KDE-Kded-phase=1

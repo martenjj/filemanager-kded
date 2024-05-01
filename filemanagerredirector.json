@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Description": "Redirects file manager requests to the configured application",
+        "Name": "File Manager Redirector",
+        "ServiceTypes": [
+            "KDEDModule"
+        ]
+    },
+    "X-KDE-Kded-autoload": "true",
+    "X-KDE-Kded-load-on-demand": "false",
+    "X-KDE-Kded-phase": "1"
+}
