@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	19-Aug-21						//
+//  Edit:	20-Nov-24						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
-//  Copyright (c) 2021 Jonathan Marten <jjm@keelhaul.me.uk>		//
-//  Home and download page:  http://www.keelhaul.me.uk/TBD/		//
+//  Copyright (c) 2021-2024 Jonathan Marten <jjm@keelhaul.me.uk>	//
+//  Home page:  https://github.com/martenjj/filemanager-kded/		//
 //									//
 //  This program is free software; you can redistribute it and/or	//
 //  modify it under the terms of the GNU General Public License as	//
