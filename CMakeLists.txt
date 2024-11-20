@@ -28,7 +28,7 @@ cmake_minimum_required(VERSION 3.16)
 project(filemanagerredirector)
 
 if (NOT DEFINED QT_MAJOR_VERSION)
-  set (QT_MAJOR_VERSION 5)
+  set (QT_MAJOR_VERSION 6)
 endif ()
 
 if (QT_MAJOR_VERSION EQUAL 6)
