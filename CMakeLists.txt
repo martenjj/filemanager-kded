@@ -1,11 +1,11 @@
 ##########################################################################
 ##									##
 ##  Project:	File Manager Redirector					##
-##  Edit:	19-Aug-21						##
+##  Edit:	30-Apr-24						##
 ##									##
 ##########################################################################
 ##									##
-##  Copyright (c) 2021 Jonathan Marten <jjm@keelhaul.me.uk>		##
+##  Copyright (c) 2021-2024 Jonathan Marten <jjm@keelhaul.me.uk>	##
 ##  Home and download page:  http://www.keelhaul.me.uk/TBD/		##
 ##									##
 ##  This program is free software; you can redistribute it and/or	##
@@ -25,18 +25,28 @@
 ##########################################################################
 
 cmake_minimum_required(VERSION 3.16)
-
 project(filemanagerredirector)
-set(PROJECT_VERSION "5.22.80")
-set(PROJECT_VERSION_MAJOR 5)
 
-set(QT_MIN_VERSION "5.15.0")
-set(KF5_MIN_VERSION "5.82")
+if (NOT DEFINED QT_MAJOR_VERSION)
+  set (QT_MAJOR_VERSION 5)
+endif ()
+
+if (QT_MAJOR_VERSION EQUAL 6)
+  set(QT_MIN_VERSION "6.3.0")
+  set(KF_MIN_VERSION "6.1.0")
+else ()
+  if (QT_MAJOR_VERSION EQUAL 5)
+    set(QT_MIN_VERSION "5.15.0")
+    set(KF_MIN_VERSION "5.82.0")
+  else ()
+    message(FATAL_ERROR "Expecting to build for either Qt5 or Qt6")
+  endif ()
+endif ()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
+find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 include(KDEInstallDirs)
@@ -47,9 +57,13 @@ include(CheckIncludeFiles)
 include(FeatureSummary)
 include(ECMQtDeclareLoggingCategory)
 
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus)
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS CoreAddons I18n DBusAddons KIO Service)
-find_package(KDED CONFIG REQUIRED)
+find_package(Qt${QT_MAJOR_VERSION} ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus)
+find_package(KF${QT_MAJOR_VERSION} ${KF_MIN_VERSION} REQUIRED COMPONENTS CoreAddons I18n DBusAddons KIO Service)
+find_package(KF${QT_MAJOR_VERSION}KDED CONFIG REQUIRED)
+
+remove_definitions("-DQT_NO_CAST_FROM_ASCII")
+remove_definitions("-DQT_NO_CAST_FROM_BYTEARRAY")
+remove_definitions("-DQT_NO_KEYWORDS")
 
 set(kded_filemanager_SRCS
     filemanager.cpp
@@ -59,14 +73,13 @@ qt_add_dbus_adaptor(kded_filemanager_SRCS org.kde.filemanagerredirector.xml
     filemanager_dbus.h FileManagerRedirectorDBus
     filemanagerredirectoradaptor FileManagerRedirectorAdaptor)
 
-kcoreaddons_add_plugin(filemanagerredirector SOURCES ${kded_filemanager_SRCS} INSTALL_NAMESPACE "kf5/kded")
-kcoreaddons_desktop_to_json(filemanagerredirector filemanagerredirector.desktop)
+kcoreaddons_add_plugin(filemanagerredirector SOURCES ${kded_filemanager_SRCS} INSTALL_NAMESPACE "kf${QT_MAJOR_VERSION}/kded")
 
 target_link_libraries(filemanagerredirector
     Qt::DBus
-    KF5::DBusAddons
-    KF5::KIOCore
-    KF5::KIOWidgets)
+    KF${QT_MAJOR_VERSION}::DBusAddons
+    KF${QT_MAJOR_VERSION}::KIOCore
+    KF${QT_MAJOR_VERSION}::KIOWidgets)
 
 # The shared library is installed by kcoreaddons_add_plugin().
 install(FILES org.kde.filemanagerredirector.xml DESTINATION ${KDE_INSTALL_DBUSINTERFACEDIR})

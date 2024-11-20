@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //									//
 //  Project:	File Manager Redirector					//
-//  Edit:	19-Aug-21						//
+//  Edit:	01-May-24						//
 //									//
 //////////////////////////////////////////////////////////////////////////
 //									//
@@ -46,8 +46,8 @@ bool FileManagerRedirectorDBus::connectToBus(const QString &service, const QStri
 {
     qDebug() << "registering service" << service << "path" << path;
 
-    // Although the name org.freedesktop.FileManager1 also claimed by Dolphin, it
-    // is declared as a DBus activated service by the service file
+    // Although the name org.freedesktop.FileManager1 is also claimed by Dolphin,
+    // it is declared as a DBus activated service by the service file
     // $KDEDIR/share/dbus-1/services/org.kde.dolphin.FileManager1.service to
     // be activated on demand.  If there has been no demand for the service yet
     // then the registration should succeed and the service file ignored from
