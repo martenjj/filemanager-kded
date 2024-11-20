@@ -1,0 +1,37 @@
+File Manager Redirector for Plasma
+==================================
+
+This addon attempts to address a longstanding anomaly with the Plasma
+desktop and its file manager applications.  As described in
+https://bugs.kde.org/show_bug.cgi?id=397953, launching a file manager,
+for example by opening an image folder from the screen capture utility
+Spectacle, always uses the Dolphin file manager if it is installed.
+This will happen even if the user has configured another file manager
+such as Konqueror or Nautilus as their preferred application.
+
+As described in the bug report, this happens because if Dolphin is
+installed it registers itself to be launched for the
+org.freedesktop.FileManager1 DBus service.  This service is used by
+applications when they wish to start a file manager, but unfortunately
+it ignores the user's configuration.  Having other file managers, in
+particular Nautilus, installed may override Dolphin or may not,
+unpredictably.
+
+This module overrides those file managers by registering itself for
+that service at Plasma startup.  When it receives a request to open a
+file manager, it finds the user's preferred file manager (which the
+highest priority service registered for the inode/directory MIME type),
+and launches that with appropriate options.  The DBus service registration
+for Dolphin or any other file manager installed is ignored.
+
+This works for Dolphin and Konqueror, and should in theory work for
+Nautilus or any other file manager which supports the "--mimetype" and
+"--select" command line options.  Konqueror has to be a special case
+because the normal "kfmclient" command to launch it does not support
+those options, but using the "konqueror" command directly does.
+
+Build and install from source in the usual way - to build for a specific
+Plasma/Frameworks version set the QT_MAJOR_VERSION option to CMake.  Then
+log out and log in again to ensure that the module is loaded.  Set your
+preferred file manager in System Settings - Apps & Windows - Default
+Applications.
